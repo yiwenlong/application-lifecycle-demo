@@ -6,10 +6,11 @@ import (
 )
 
 type options struct {
-	name 	string
+	name 		string
 
-	ctx 	context.Context
-	sigs 	[]os.Signal
+	ctx 		context.Context
+	sigs 		[]os.Signal
+	services 	[]Service
 }
 
 type Option func(o *options)
@@ -24,4 +25,8 @@ func Context(ctx context.Context) Option {
 
 func Signal(sigs []os.Signal) Option {
 	return func(o *options) { o.sigs = sigs }
+}
+
+func Services(services ...Service) Option {
+	return func(o *options) { o.services = services }
 }

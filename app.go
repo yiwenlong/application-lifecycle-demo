@@ -16,6 +16,11 @@ type App struct {
 	cancel	func()
 }
 
+type Service interface {
+	Start() error
+	Stop() 	error
+}
+
 func New(opts ...Option) *App {
 	options := options{
 		ctx:    context.Background(),
@@ -35,6 +40,16 @@ func New(opts ...Option) *App {
 func (app *App) Run() error {
 	g, ctx := errgroup.WithContext(app.ctx)
 
+	for _, s := range app.opts.services {
+		srv := s
+		g.Go(func() error {
+			<-ctx.Done()
+			return srv.Stop()
+		})
+		g.Go(func() error {
+			return srv.Start()
+		})
+	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, app.opts.sigs...)
 	g.Go(func() error {
